@@ -54,6 +54,9 @@ class Vycetka(object):
 
     def vycetkaRow(self, col, row):
         nrow = row + 1
+        data = self.sheet.getCellByPosition(col, row).getValue()
+        if data == 0:
+            return
         for i in range(len(Vycetka.BANKOVKY)):
             sumprev = ""
             for j in range(0, i):
