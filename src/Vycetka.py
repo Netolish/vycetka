@@ -5,7 +5,16 @@ import uno
 import unohelper
 from com.sun.star.beans import PropertyValue
 from com.sun.star.sheet import XRangeSelectionListener
+from com.sun.star.table import BorderLine2, BorderLineStyle
 
+USE_ROUND = True
+BCK_COLOR = 0x00f0fff0
+
+BORDER = BorderLine2()
+BORDER.Color = 0
+BORDER.OuterLineWidth = 15
+BORDER.InnerLineWidth = 0
+BORDER.LineStyle = BorderLineStyle.SOLID
 
 class Vycetka(object):
 
@@ -25,6 +34,7 @@ class Vycetka(object):
         self.genHeader()
         self.fillVycetka()
         self.fillSum()
+        self.formating()
 
     def genHeader(self): 
         (col, row) = self.first
@@ -33,12 +43,17 @@ class Vycetka(object):
         self.last = (self.last[0], self.last[1] + 2)
         cell = self.sheet.getCellByPosition(col, row)
         cell.setString('Bankovka/Mince')
+        cell.CellBackColor = BCK_COLOR
         bankcol = col + 1
         for b in Vycetka.BANKOVKY:
-            self.sheet.getCellByPosition(bankcol, row).setValue(b)
+            bcell = self.sheet.getCellByPosition(bankcol, row)
+            bcell.setValue(b)
+            bcell.CellBackColor = BCK_COLOR
             bankcol += 1
         cell = self.sheet.getCellByPosition(col, row + 1)
         cell.setString('Počet')
+        cell.CellBackColor = BCK_COLOR
+        cell.BottomBorder2 = BORDER
 
     def fillVycetka(self):
         for row in range(self.first[1], self.last[1] + 1):
@@ -51,6 +66,8 @@ class Vycetka(object):
             formula = '=SUM({}:{})'.format(Vycetka.addr(col + i + 1, self.first[1] + 1),
                     Vycetka.addr(col + 1 + i, self.last[1] + 1))
             cell.setFormula(formula)
+            cell.CellBackColor = BCK_COLOR
+            cell.BottomBorder2 = BORDER
 
     def vycetkaRow(self, col, row):
         nrow = row + 1
@@ -63,11 +80,32 @@ class Vycetka(object):
                 sumprev += " - {}*{}".format(Vycetka.addr(col + 1 + j, nrow),
                                               Vycetka.addr(col + 1 + j,
                                                            self.first[1] - 1, rowabs=True))
-            formula = "=FLOOR((ROUND({}){})/{})".format(Vycetka.addr(col, nrow), sumprev,
-                                                        Vycetka.addr(col + 1 + i,
+            if USE_ROUND:
+                val = "ROUND({})".format(Vycetka.addr(col, nrow))
+            else:
+                val = Vycetka.addr(col, nrow)
+            formula = "=FLOOR(({}{})/{})".format(val, sumprev,
+                                                 Vycetka.addr(col + 1 + i,
                                                               self.first[1] - 1, rowabs=True))
             cell = self.sheet.getCellByPosition(col + 1 + i, row)
             cell.setFormula(formula)
+
+    def parseRange(self, rangeDescriptor):
+        parts = rangeDescriptor.split('.')
+        if len(parts) == 2:
+            begend = parts[1].split(':')
+            if len(begend) == 2:
+                (dummy, col, row) = begend[0].split('$')
+                self.first = (Vycetka.colIdx(col), int(row) - 1)
+                (dummy, col, row) = begend[1].split('$')
+                self.last = (Vycetka.colIdx(col), int(row) - 1)
+
+    def formating(self):
+        """TODO: Docstring for formating.
+        :returns: TODO
+
+        """
+        self.sheet.getColumns().getByIndex(self.first[0]).OptimalWidth = True
 
     @staticmethod
     def getSheet(rangeDescriptor):
@@ -101,16 +139,6 @@ class Vycetka(object):
         if len(colname) == 1:
             return ord(colname) - ord('A')
         return (ord(colname[0]) - ord('A') + 1) * 26 + ord(colname[1]) - ord('A')
-
-    def parseRange(self, rangeDescriptor):
-        parts = rangeDescriptor.split('.')
-        if len(parts) == 2:
-            begend = parts[1].split(':')
-            if len(begend) == 2:
-                (dummy, col, row) = begend[0].split('$')
-                self.first = (Vycetka.colIdx(col), int(row) - 1)
-                (dummy, col, row) = begend[1].split('$')
-                self.last = (Vycetka.colIdx(col), int(row) - 1)
     
 
 
