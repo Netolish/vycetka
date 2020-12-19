@@ -83,7 +83,15 @@ class Vycetka(object):
             rprefix = '$'
         else:
             rprefix = ''
-        return "{}{}{}{}".format(cprefix, chr(col + ord('A')), rprefix, row)
+        return "{}{}{}{}".format(cprefix, Vycetka.colName(col), rprefix, row)
+
+    @staticmethod
+    def colName(colnum):
+        if colnum < 26:
+            return chr(colnum + ord('A'))
+        div = colnum // 26
+        rem = colnum % 26
+        return chr(div - 1 + ord('A')) + chr(rem + ord('A')) 
 
     def parseRange(self, rangeDescriptor):
         parts = rangeDescriptor.split('.')
