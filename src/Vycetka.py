@@ -63,8 +63,8 @@ class Vycetka(object):
                 sumprev += " - {}*{}".format(Vycetka.addr(col + 1 + j, nrow),
                                               Vycetka.addr(col + 1 + j,
                                                            self.first[1] - 1, rowabs=True))
-            formula = "=FLOOR(({}{})/{})".format(Vycetka.addr(col, nrow), sumprev,
-                                                 Vycetka.addr(col + 1 + i,
+            formula = "=FLOOR((ROUND({}){})/{})".format(Vycetka.addr(col, nrow), sumprev,
+                                                        Vycetka.addr(col + 1 + i,
                                                               self.first[1] - 1, rowabs=True))
             cell = self.sheet.getCellByPosition(col + 1 + i, row)
             cell.setFormula(formula)
