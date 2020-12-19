@@ -75,15 +75,15 @@ class Vycetka(object):
 
     @staticmethod
     def addr(col, row, colabs=False, rowabs=False):
-        ad = ''
         if colabs:
-            ad += '$'
-        ad += chr(col + ord('A'))
+            cprefix = '$'
+        else:
+            cprefix = ''
         if rowabs:
-            ad += '$'
-        ad += str(row)
-        print(ad)
-        return ad
+            rprefix = '$'
+        else:
+            rprefix = ''
+        return "{}{}{}{}".format(cprefix, chr(col + ord('A')), rprefix, row)
 
     def parseRange(self, rangeDescriptor):
         parts = rangeDescriptor.split('.')
