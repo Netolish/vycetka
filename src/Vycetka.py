@@ -93,15 +93,21 @@ class Vycetka(object):
         rem = colnum % 26
         return chr(div - 1 + ord('A')) + chr(rem + ord('A')) 
 
+    @staticmethod
+    def colIdx(colname):
+        if len(colname) == 1:
+            return ord(colname) - ord('A')
+        return (ord(colname[0]) - ord('A') + 1) * 26 + ord(colname[1]) - ord('A')
+
     def parseRange(self, rangeDescriptor):
         parts = rangeDescriptor.split('.')
         if len(parts) == 2:
             begend = parts[1].split(':')
             if len(begend) == 2:
                 (dummy, col, row) = begend[0].split('$')
-                self.first = (ord(col) - ord('A'), int(row) - 1)
+                self.first = (Vycetka.colIdx(col), int(row) - 1)
                 (dummy, col, row) = begend[1].split('$')
-                self.last = (ord(col) - ord('A'), int(row) - 1)
+                self.last = (Vycetka.colIdx(col), int(row) - 1)
     
 
 
